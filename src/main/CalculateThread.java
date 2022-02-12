@@ -3,8 +3,11 @@ package main;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import static main.Cytus2Calculator.*;
-import static main.Main.*;
+import static main.Cytus2Calculator.THREAD_NUM;
+import static main.Cytus2Calculator.progress;
+import static main.Cytus2Calculator.solutions;
+import static main.Main.c2s;
+import static main.Main.s2c;
 
 public class CalculateThread extends Thread {
     private final int threadID;// 线程序号，用于判断某个p值是不是本线程处理

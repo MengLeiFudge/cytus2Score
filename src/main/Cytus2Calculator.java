@@ -4,7 +4,8 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import static main.Main.*;
+import static main.Main.c2s;
+import static main.Main.nanoSecondToStr;
 
 public class Cytus2Calculator {
     private final int note;// 歌曲按键总数
