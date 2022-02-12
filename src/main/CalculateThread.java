@@ -60,7 +60,7 @@ public class CalculateThread extends Thread {
                 // 满足基本条件，现有p、gb的值可能拼出该范围的份数
                 addAllSolutions(p, gb, minShares, maxShares);
             }
-            synchronized (CalculateThread.class){
+            synchronized (CalculateThread.class) {
                 progress++;
             }
             // long e1 = System.nanoTime();
@@ -164,13 +164,10 @@ public class CalculateThread extends Thread {
             for (int i = 0; i < Math.min(s.size(), 10); i++) {
                 // 将最高的10个解加入总解列表
                 Solution solution = s.get(i);
-                synchronized (CalculateThread.class){
-                    for (Solution s0 : solutions) {
-                        if (s0.equals(solution)) {
-                            return;
-                        }
+                synchronized (CalculateThread.class) {
+                    if (!solutions.contains(solution)) {
+                        solutions.add(solution);
                     }
-                    solutions.add(solution);
                 }
             }
         }
