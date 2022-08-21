@@ -3,71 +3,34 @@ package main;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import static main.Cytus2Calculator.THREAD_NUM;
 import static main.Cytus2Calculator.progress;
 import static main.Cytus2Calculator.solutions;
-import static main.Main.c2s;
-import static main.Main.s2c;
+import static main.SettingsAndUtils.THREAD_NUM;
+import static main.SettingsAndUtils.c2s;
+import static main.SettingsAndUtils.s2c;
 
 public class CalculateThread extends Thread {
-    private final int threadID;// 线程序号，用于判断某个p值是不是本线程处理
-    private final int note;// 歌曲按键总数
-    private final int targetScore;// 目标分数
-    private final double noteScoreMin;// 最低note分
-    private final double noteScoreMax;// 最高note分
-    private final double perShareScore;// 每一份对应的分数
+    private final int threadID;
+    private final int note;
+    private final ArrayList<CalculateParam> paramList;
 
-    static final int MAX_GB = 20;// 最多g+b的值
-
-    CalculateThread(int id, int note, int targetScore,
-                    double noteScoreMin, double noteScoreMax, double perShareScore) {
+    CalculateThread(int id, int note, ArrayList<CalculateParam> paramList) {
         this.threadID = id;
         this.note = note;
-        this.targetScore = targetScore;
-        this.noteScoreMin = noteScoreMin;
-        this.noteScoreMax = noteScoreMax;
-        this.perShareScore = perShareScore;
+        this.paramList = paramList;
     }
 
     @Override
     public void run() {
-        // 根据指定的p、gb的值，确定所需份数
-        for (int p = 0; p <= note; p++) {// p: shiny perfect + perfect
-            if (p % THREAD_NUM != threadID) {// 计算由序号为 p % THREAD_NUM 的线程完成
+        for (int i = 0; i < paramList.size(); i++) {
+            if (i % THREAD_NUM != threadID) {
                 continue;
             }
-            // long s1 = System.nanoTime();
-            for (int gb = 0; gb <= note - p; gb++) {// gb: great + bad
-                if (gb > MAX_GB) {// 去掉极难打出来的解
-                    break;
-                }
-                double noteScore = (p * 1.0 + gb * 0.3) * 900000 / note;// 按键分
-                if (noteScore < noteScoreMin || noteScore >= noteScoreMax) {
-                    continue;
-                }
-                // [minComboScore, minComboScore + 1) 这个范围有0个或多个份数符合条件
-                double minComboScore = targetScore - noteScore;// 最低连击分
-                int minShares = (int) (minComboScore / perShareScore);
-                if (noteScore + minShares * perShareScore < targetScore) {
-                    minShares++;
-                }
-                int maxShares = minShares;
-                while (noteScore + maxShares * perShareScore < targetScore + 1) {
-                    maxShares++;
-                }
-                maxShares--;
-                if (minShares > maxShares) {
-                    // 没有份数符合条件
-                    continue;
-                }
-                // 满足基本条件，现有p、gb的值可能拼出该范围的份数
-                addAllSolutions(p, gb, minShares, maxShares);
-            }
+            CalculateParam param = paramList.get(i);
+            addAllSolutions(param.p, param.gb, param.minShares, param.maxShares);
             synchronized (CalculateThread.class) {
                 progress++;
             }
-            // long e1 = System.nanoTime();
-            // System.out.println("p" + p + " 计算完毕，用时 " + nanoSecondToStr(s1, e1));
         }
     }
 
@@ -80,7 +43,8 @@ public class CalculateThread extends Thread {
      * @param maxShares 最高连击份数和
      */
     private void addAllSolutions(int p, int gb, int minShares, int maxShares) {
-        ArrayList<Solution> s = new ArrayList<>();// 临时存放解
+        // 临时存放解
+        ArrayList<Solution> s = new ArrayList<>();
 
         // 单份 combo
         int c0min;
@@ -162,11 +126,12 @@ public class CalculateThread extends Thread {
             }
         }
 
+        // combo 分为四份、五份的情况不去计算，耗费时间多还不好打
+
+        // 将解全部加入总解列表
         if (!s.isEmpty()) {
             Collections.sort(s);
-            for (int i = 0; i < Math.min(s.size(), 10); i++) {
-                // 将最高的10个解加入总解列表
-                Solution solution = s.get(i);
+            for (Solution solution : s) {
                 synchronized (CalculateThread.class) {
                     if (!solutions.contains(solution)) {
                         solutions.add(solution);

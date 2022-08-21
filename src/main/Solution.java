@@ -11,7 +11,8 @@ public class Solution implements Comparable<Solution> {
     Solution(int p, int gb, Integer... comboDiv) {
         this.p = p;
         this.comboDiv = comboDiv;
-        Arrays.sort(comboDiv, (i1, i2) -> Integer.compare(i2, i1));// 各段combo由多到少排列
+        // 各段combo由多到少排列
+        Arrays.sort(comboDiv, (i1, i2) -> Integer.compare(i2, i1));
         int leftP = p;
         int leftGB = gb;
         int g0 = 0;
@@ -47,16 +48,28 @@ public class Solution implements Comparable<Solution> {
 
     @Override
     public int compareTo(Solution s) {
+        if (g + b != s.g + s.b) {
+            // g+b少的靠前
+            return (g + b) - (s.g + s.b);
+        }
+        if (comboDiv.length != s.comboDiv.length) {
+            // 段数少的靠前
+            return comboDiv.length - s.comboDiv.length;
+        }
         if (p + g + b != s.p + s.g + s.b) {
-            return Integer.compare(p + g + b, s.p + s.g + s.b);// 总按键数少的靠前
+            // 总按键数少的靠前
+            return (p + g + b) - (s.p + s.g + s.b);
         }
         if (g != s.g) {
-            return Integer.compare(g, s.g);// 总键数相同时，g少的靠前
+            // g少的靠前
+            return Integer.compare(g, s.g);
         }
         if (b != s.b) {
-            return Integer.compare(b, s.b);// g相同时，b少的靠前
+            // b少的靠前
+            return Integer.compare(b, s.b);
         }
-        return Integer.compare(p, s.p);// g、b相同时，p少的靠前
+        // p少的靠前
+        return Integer.compare(p, s.p);
     }
 
     /**
