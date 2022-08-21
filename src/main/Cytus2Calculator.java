@@ -26,9 +26,6 @@ public class Cytus2Calculator {
     static ArrayList<Solution> solutions;
     static int progress;
 
-    static final int THREAD_NUM = Runtime.getRuntime().availableProcessors();// 多线程计算时，所使用的线程数目
-    static final int MAX_SHOW_NUM = 10;// 最多展示多少个解
-
     Cytus2Calculator(int note, int targetScore) {
         this.note = note;
         this.targetScore = targetScore;
