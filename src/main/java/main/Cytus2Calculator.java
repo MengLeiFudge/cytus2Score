@@ -7,13 +7,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static main.SettingsAndUtils.MAX_GB;
-import static main.SettingsAndUtils.MAX_SHOW_NUM;
-import static main.SettingsAndUtils.THREAD_NUM;
-import static main.SettingsAndUtils.c2s;
-import static main.SettingsAndUtils.df;
-import static main.SettingsAndUtils.df2;
-
 public class Cytus2Calculator {
     private final int note;
     private final int targetScore;
@@ -31,7 +24,7 @@ public class Cytus2Calculator {
         this.targetScore = targetScore;
         this.noteScoreMin = Math.max(targetScore - 100000, 0);
         this.noteScoreMax = targetScore + 1.0;
-        this.perShareScore = 100000.0 / c2s(note);
+        this.perShareScore = 100000.0 / SettingsAndUtils.c2s(note);
         Cytus2Calculator.solutions = new ArrayList<>();
         Cytus2Calculator.progress = 0;
     }
@@ -45,7 +38,7 @@ public class Cytus2Calculator {
             // gb: great + bad
             for (int gb = 0; gb <= note - p; gb++) {
                 // 去掉极难打出来的解
-                if (gb > MAX_GB) {
+                if (gb > SettingsAndUtils.MAX_GB) {
                     break;
                 }
                 // 计算总按键分
@@ -95,23 +88,23 @@ public class Cytus2Calculator {
                     continue;
                 }
                 System.out.println("计算进度：" +
-                        df.format((double) progress / paramList.size()) +
-                        " (" + progress + "/" + paramList.size() + ")，用时 " + df2.format(seconds) + " 秒");
+                        SettingsAndUtils.df.format((double) progress / paramList.size()) +
+                        " (" + progress + "/" + paramList.size() + ")，用时 " + SettingsAndUtils.df2.format(seconds) + " 秒");
                 lastPrintSeconds = (int) seconds;
             }
         });
         singleThreadPool.shutdown();
 
         // 开启计算线程
-        CalculateThread[] threads = new CalculateThread[THREAD_NUM];
-        for (int i = 0; i < THREAD_NUM; i++) {
+        CalculateThread[] threads = new CalculateThread[SettingsAndUtils.THREAD_NUM];
+        for (int i = 0; i < SettingsAndUtils.THREAD_NUM; i++) {
             threads[i] = new CalculateThread(i, note, paramList);
             threads[i].start();
         }
 
         // 等待所有线程计算完毕
         try {
-            for (int i = 0; i < THREAD_NUM; i++) {
+            for (int i = 0; i < SettingsAndUtils.THREAD_NUM; i++) {
                 threads[i].join();
             }
         } catch (InterruptedException e) {
@@ -120,7 +113,7 @@ public class Cytus2Calculator {
         }
 
         double seconds = (System.nanoTime() - beginTime) / 1000000000.0;
-        System.out.println("计算完毕，用时 " + df2.format(seconds) + " 秒");
+        System.out.println("计算完毕，用时 " + SettingsAndUtils.df2.format(seconds) + " 秒");
 
         // 输出最终结果
         if (solutions.isEmpty()) {
@@ -129,7 +122,7 @@ public class Cytus2Calculator {
         }
         System.out.println("共找到 " + solutions.size() + " 组解！");
         Collections.sort(solutions);
-        for (int i = 0; i < Math.min(solutions.size(), MAX_SHOW_NUM); i++) {
+        for (int i = 0; i < Math.min(solutions.size(), SettingsAndUtils.MAX_SHOW_NUM); i++) {
             System.out.println(solutions.get(i).toString());
         }
     }

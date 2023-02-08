@@ -3,12 +3,6 @@ package main;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import static main.Cytus2Calculator.progress;
-import static main.Cytus2Calculator.solutions;
-import static main.SettingsAndUtils.THREAD_NUM;
-import static main.SettingsAndUtils.c2s;
-import static main.SettingsAndUtils.s2c;
-
 public class CalculateThread extends Thread {
     private final int threadID;
     private final int note;
@@ -23,13 +17,13 @@ public class CalculateThread extends Thread {
     @Override
     public void run() {
         for (int i = 0; i < paramList.size(); i++) {
-            if (i % THREAD_NUM != threadID) {
+            if (i % SettingsAndUtils.THREAD_NUM != threadID) {
                 continue;
             }
             CalculateParam param = paramList.get(i);
             addAllSolutions(param.p, param.gb, param.minShares, param.maxShares);
             synchronized (CalculateThread.class) {
-                progress++;
+                Cytus2Calculator.progress++;
             }
         }
     }
@@ -50,19 +44,19 @@ public class CalculateThread extends Thread {
         int c0min;
         int c0max;
         // combo 只有一份情况下，判断是否有解
-        c0min = s2c(minShares);
-        c0max = s2c(maxShares);
+        c0min = SettingsAndUtils.s2c(minShares);
+        c0max = SettingsAndUtils.s2c(maxShares);
         if (c0min == c0max) {
             // 如果指向同一个 combo，必有 c2s(combo) <= minShares
-            if (c0min >= p && c0min <= p + gb && c2s(c0min) == minShares) {
+            if (c0min >= p && c0min <= p + gb && SettingsAndUtils.c2s(c0min) == minShares) {
                 s.add(new Solution(p, gb, c0min));
             }
         } else {
             // 如果指向不同的 combo，必有 c2s(c0min) <= minShares < c2s(c0max) <= maxShares
-            if (c0min >= p && c0min <= p + gb && c2s(c0min) == minShares) {
+            if (c0min >= p && c0min <= p + gb && SettingsAndUtils.c2s(c0min) == minShares) {
                 s.add(new Solution(p, gb, c0min));
             }
-            if (c0max >= p && c0max <= p + gb && c2s(c0max) == maxShares) {
+            if (c0max >= p && c0max <= p + gb && SettingsAndUtils.c2s(c0max) == maxShares) {
                 s.add(new Solution(p, gb, c0max));
             }
         }
@@ -74,25 +68,25 @@ public class CalculateThread extends Thread {
 
         // combo 分为两份情况下，判断是否有解
         for (int c1 = 1; c1 < note; c1++) {
-            minSharesLeft = minShares - c2s(c1);
-            maxSharesLeft = maxShares - c2s(c1);
+            minSharesLeft = minShares - SettingsAndUtils.c2s(c1);
+            maxSharesLeft = maxShares - SettingsAndUtils.c2s(c1);
             if (minSharesLeft < 0 || maxSharesLeft < 0) {
                 break;
             }
-            c0min = s2c(minSharesLeft);
-            c0max = s2c(maxSharesLeft);
+            c0min = SettingsAndUtils.s2c(minSharesLeft);
+            c0max = SettingsAndUtils.s2c(maxSharesLeft);
             comboSum = c0max + c1;
             if (c0min == c0max) {
                 // 如果指向同一个 combo，必有 c2s(combo) <= minShares
-                if (comboSum >= p && comboSum <= p + gb && c2s(c0min) == minSharesLeft) {
+                if (comboSum >= p && comboSum <= p + gb && SettingsAndUtils.c2s(c0min) == minSharesLeft) {
                     s.add(new Solution(p, gb, c0min, c1));
                 }
             } else {
                 // 如果指向不同的 combo，必有 c2s(c0min) <= minShares < c2s(c0max) <= maxShares
-                if (comboSum >= p && comboSum <= p + gb && c2s(c0min) == minSharesLeft) {
+                if (comboSum >= p && comboSum <= p + gb && SettingsAndUtils.c2s(c0min) == minSharesLeft) {
                     s.add(new Solution(p, gb, c0min, c1));
                 }
-                if (comboSum >= p && comboSum <= p + gb && c2s(c0max) == maxSharesLeft) {
+                if (comboSum >= p && comboSum <= p + gb && SettingsAndUtils.c2s(c0max) == maxSharesLeft) {
                     s.add(new Solution(p, gb, c0max, c1));
                 }
             }
@@ -101,25 +95,25 @@ public class CalculateThread extends Thread {
         // combo 分为三份情况下，判断是否有解
         for (int c1 = 1; c1 < note; c1++) {
             for (int c2 = 1; c2 < note - c1; c2++) {
-                minSharesLeft = minShares - c2s(c1) - c2s(c2);
-                maxSharesLeft = maxShares - c2s(c1) - c2s(c2);
+                minSharesLeft = minShares - SettingsAndUtils.c2s(c1) - SettingsAndUtils.c2s(c2);
+                maxSharesLeft = maxShares - SettingsAndUtils.c2s(c1) - SettingsAndUtils.c2s(c2);
                 if (minSharesLeft < 0 || maxSharesLeft < 0) {
                     break;
                 }
-                c0min = s2c(minSharesLeft);
-                c0max = s2c(maxSharesLeft);
+                c0min = SettingsAndUtils.s2c(minSharesLeft);
+                c0max = SettingsAndUtils.s2c(maxSharesLeft);
                 comboSum = c0max + c1 + c2;
                 if (c0min == c0max) {
                     // 如果指向同一个 combo，必有 c2s(combo) <= minShares
-                    if (comboSum >= p && comboSum <= p + gb && c2s(c0min) == minSharesLeft) {
+                    if (comboSum >= p && comboSum <= p + gb && SettingsAndUtils.c2s(c0min) == minSharesLeft) {
                         s.add(new Solution(p, gb, c0min, c1, c2));
                     }
                 } else {
                     // 如果指向不同的 combo，必有 c2s(c0min) <= minShares < c2s(c0max) <= maxShares
-                    if (comboSum >= p && comboSum <= p + gb && c2s(c0min) == minSharesLeft) {
+                    if (comboSum >= p && comboSum <= p + gb && SettingsAndUtils.c2s(c0min) == minSharesLeft) {
                         s.add(new Solution(p, gb, c0min, c1, c2));
                     }
-                    if (comboSum >= p && comboSum <= p + gb && c2s(c0max) == maxSharesLeft) {
+                    if (comboSum >= p && comboSum <= p + gb && SettingsAndUtils.c2s(c0max) == maxSharesLeft) {
                         s.add(new Solution(p, gb, c0max, c1, c2));
                     }
                 }
@@ -133,8 +127,8 @@ public class CalculateThread extends Thread {
             Collections.sort(s);
             for (Solution solution : s) {
                 synchronized (CalculateThread.class) {
-                    if (!solutions.contains(solution)) {
-                        solutions.add(solution);
+                    if (!Cytus2Calculator.solutions.contains(solution)) {
+                        Cytus2Calculator.solutions.add(solution);
                     }
                 }
             }
